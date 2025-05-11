@@ -1,0 +1,49 @@
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+%matplotlib inline
+
+df = pd.read_csv(r'C:\Users\SACHIN RM\.cache\kagglehub\datasets\mkechinov\ecommerce-events-history-in-cosmetics-shop\versions\6\2019-Dec.csv')
+
+#print(df.info())
+#print(df.head())
+
+df['event_time'] = pd.to_datetime(df['event_time'])
+
+#print(df.isnull().sum())
+
+df.dropna(subset=['price', 'product_id'], inplace=True)
+
+event_counts = df['event_type'].value_counts()
+event_counts.plot(kind='bar', title='Event Type Frequency')
+plt.xlabel('Event Type')
+plt.ylabel('Count')
+plt.show()
+
+top_viewed_brands = df[df['event_type'] == 'view'].groupby('brand').size().sort_values(ascending=False).head(10)
+top_viewed_brands.plot(kind='bar', title='Top 10 Most Viewed Brands')
+plt.ylabel('Views')
+plt.xticks(rotation=45)
+plt.show()
+
+df['estimated_revenue'] = df['price']
+cart_revenue = df[df['event_type'] == 'cart'].groupby('brand')['estimated_revenue'].sum().sort_values(ascending=False).head(10)
+cart_revenue.plot(kind='bar', title='Estimated Revenue by Brand (Cart Events)')
+plt.ylabel('Revenue ($)')
+plt.xticks(rotation=45)
+plt.show()
+
+df['hour'] = df['event_time'].dt.hour
+fig = plt.figure(figsize = (14,6))
+sns.countplot(data=df, x='hour', hue='event_type')
+plt.title('User Activity by Hour')
+plt.xlabel('Hour of Day')
+plt.ylabel('Event Count')
+plt.show()
+
+df['date'] = df['event_time'].dt.date
+daily_users = df.groupby('date')['user_id'].nunique()
+daily_users.plot(title='Daily Unique Users')
+plt.ylabel('Users')
+plt.xticks(rotation=45)
+plt.show()
