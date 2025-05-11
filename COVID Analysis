@@ -1,0 +1,41 @@
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+
+# Step 1: Load the dataset
+url = "https://covid.ourworldindata.org/data/owid-covid-data.csv"
+df = pd.read_csv(url)
+
+# Step 2: Filter data for a specific country (e.g., India)
+country = "India"
+df_country = df[df['location'] == country]
+df_country = df_country[['date', 'total_cases', 'total_deaths', 'total_vaccinations']].copy()
+
+# Step 3: Preprocess the data
+df_country['date'] = pd.to_datetime(df_country['date'])
+df_country.fillna(0, inplace=True)
+
+# Step 4: Use NumPy for calculation
+cases = df_country['total_cases'].values
+deaths = df_country['total_deaths'].values
+
+# Calculate fatality rate safely
+fatality_rate = np.divide(deaths, cases, out=np.zeros_like(deaths), where=cases != 0)
+
+# Step 5: Plotting
+plt.figure(figsize=(10, 6))
+plt.plot(df_country['date'], df_country['total_cases'], label='Total Cases', color='blue')
+plt.plot(df_country['date'], df_country['total_deaths'], label='Total Deaths', color='red')
+plt.plot(df_country['date'], fatality_rate * 100, label='Fatality Rate (%)', color='orange')
+plt.plot(df_country['date'], df_country['total_vaccinations'], label='Total Vaccinations', color='green')
+
+# Customizing plot
+plt.title(f'COVID-19 Trend in {country}')
+plt.xlabel('Date')
+plt.ylabel('Count / Rate')
+plt.legend()
+plt.grid(True)
+#plt.tight_layout()
+
+# Show the plot
+plt.show()
